@@ -1,61 +1,57 @@
 import { useState } from "react";
 import { createPost } from "../api/posts";
 
-
-/**
- * Component for creating a new post
- */
-export default function CreatePost() {
-
-  // Local state for form inputs
+export default function CreatePost({ onPostCreated }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  /**
-   * Handle form submission
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!title.trim() || !content.trim()) return;
+
+    setLoading(true);
+
     try {
-      // Call API to create post
       const newPost = await createPost(title, content);
-      console.log("CREATED:", newPost);
 
-      // User feedback
-      alert("Post creado");
+      // Notificar al componente padre
+      onPostCreated?.(newPost);
 
-      // Reset form fields
       setTitle("");
       setContent("");
-
     } catch (err) {
       console.error(err);
-      // Error feedback (likely auth issue)
-      alert("Error creando post (¿logueado?)");
+      alert("Error creando post");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="create-post" onSubmit={handleSubmit}>
       <h2>Crear Post</h2>
 
-      {/* Title input */}
-      <input
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div className="form-group">
+        <input
+          placeholder="Título"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-      {/* Content textarea */}
-      <textarea
-        placeholder="Contenido"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      <div className="form-group">
+        <textarea
+          placeholder="Contenido"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
 
-      {/* Submit button */}
-      <button type="submit">Crear</button>
+      <button className="btn-primary" disabled={loading}>
+        {loading ? "Creando..." : "Crear"}
+      </button>
     </form>
   );
 }

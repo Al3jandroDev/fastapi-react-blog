@@ -1,62 +1,118 @@
 import { useEffect, useState } from "react";
-import { getPosts } from "../api/posts";
+import { getPosts, deletePost, updatePost } from "../api/posts";
 
-/**
- * Component to display a list of posts
- */
-export default function Posts() {
-
-  // States
-  const [posts, setPosts] = useState([]);
+export default function Posts({ posts, setPosts }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /**
-   * Fetch posts when component mounts
-   */
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const data = await getPosts();
-        setPosts(data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load posts");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
-    fetchPosts();
+  useEffect(() => {
+    loadPosts();
   }, []);
 
-  // Loading state
-  if (loading) {
-    return <p>Loading posts...</p>;
-  }
+  const loadPosts = async () => {
+    try {
+      const data = await getPosts();
+      setPosts(data);
+    } catch {
+      setError("Failed to load posts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Error state
-  if (error) {
-    return <p>{error}</p>;
-  }
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this post?")) return;
 
-  // Empty state
-  if (!posts.length) {
-    return <p>No posts yet</p>;
-  }
+    try {
+      await deletePost(id);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch {
+      alert("Error deleting post");
+    }
+  };
+
+  const startEdit = (post) => {
+    setEditingId(post.id);
+    setEditTitle(post.title);
+    setEditContent(post.content);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const updated = await updatePost(id, {
+        title: editTitle,
+        content: editContent,
+      });
+
+      setPosts((prev) =>
+        prev.map((p) => (p.id === id ? updated : p))
+      );
+
+      cancelEdit();
+    } catch {
+      alert("Error updating post");
+    }
+  };
+
+  if (loading) return <div className="loading">Loading posts...</div>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div>
+    <div className="posts">
       <h2>Posts</h2>
 
-      {/* Render list of posts */}
       {posts.map((post) => (
         <div key={post.id} className="post">
-          <h3>{post.title}</h3>
-          <p>{post.content}</p>
 
-          {/* Extra info */}
-          <small>Author ID: {post.author_id}</small>
+          {editingId === post.id ? (
+            <>
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+
+              <div className="post-actions">
+                <button onClick={() => handleUpdate(post.id)}>
+                  Save
+                </button>
+                <button onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3>{post.title}</h3>
+              <p>{post.content}</p>
+
+              <small>👤 @{post.author_username}</small>
+
+              <div className="post-actions">
+                <button onClick={() => startEdit(post)}>
+                  Edit
+                </button>
+                <button onClick={() => handleDelete(post.id)}>
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
+
         </div>
       ))}
     </div>

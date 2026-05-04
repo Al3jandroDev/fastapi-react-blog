@@ -14,7 +14,7 @@ from app.schemas.auth import UserCreate, UserLogin, UserRead, Token
 from app.models.user import User
 
 # Auth utilities: password hashing and JWT creation
-from app.services.auth import Hasher, create_access_token
+from app.services.auth import Hasher, create_access_token, get_current_user
 
 # Dependency to get DB session
 from app.db.database import get_session
@@ -74,6 +74,7 @@ def register(user_create: UserCreate, session: SessionDep):
     return new_user
 
 
+
 # LOGIN ENDPOINT
 @router.post("/login", response_model=Token)
 def login(user_login: UserLogin, session: SessionDep):
@@ -102,5 +103,15 @@ def login(user_login: UserLogin, session: SessionDep):
     # Return token to client
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "username": user.username
+    }
+
+
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
     }

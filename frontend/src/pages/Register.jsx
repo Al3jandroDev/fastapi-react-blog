@@ -1,27 +1,26 @@
 import { useState } from "react";
-import { login } from "../api/auth";
+import { register } from "../api/auth";
 
-export default function Login({ onLogin, onSwitchToRegister }) {
+export default function Register({onSwitchToLogin  }) {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const data = await login(username, password);
+      await register(username, email, password);
 
-      // ✅ SOLO TOKEN (NO username)
-      localStorage.setItem("token", data.access_token);
-
-      // 🔥 IMPORTANTE: solo pasamos token
-      if (onLogin) onLogin(data.access_token);
+      // opcional: auto login o ir a login
+      if (onSwitchToLogin ) onSwitchToLogin ();
 
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -31,6 +30,7 @@ export default function Login({ onLogin, onSwitchToRegister }) {
     <div className="google-page">
       <div className="google-card">
 
+        {/* LOGO */}
         <div className="google-logo">
           <span className="g-blue">G</span>
           <span className="g-red">o</span>
@@ -40,12 +40,18 @@ export default function Login({ onLogin, onSwitchToRegister }) {
           <span className="g-red">e</span>
         </div>
 
-        <h2>Sign in</h2>
+        <h2>Create account</h2>
 
         <input
-          placeholder="Email or username"
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+        />
+
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
@@ -53,22 +59,21 @@ export default function Login({ onLogin, onSwitchToRegister }) {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
         />
 
         {error && <div className="error">{error}</div>}
 
-        <button onClick={handleLogin} disabled={loading}>
-          {loading ? "Loading..." : "Next"}
+        <button onClick={handleRegister} disabled={loading}>
+          {loading ? "Creating..." : "Create account"}
         </button>
 
         <p style={{ textAlign: "center", marginTop: "10px" }}>
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <span
             style={{ color: "#3b82f6", cursor: "pointer" }}
-            onClick={onSwitchToRegister}
+            onClick={onSwitchToLogin}
           >
-            Create account
+            Sign in
           </span>
         </p>
 

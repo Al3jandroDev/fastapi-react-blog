@@ -1,94 +1,129 @@
-# FastAPI imports for routing, dependency injection, and error handling
+# FastAPI imports
 from fastapi import APIRouter, Depends, HTTPException
 
-# SQLModel for database operations
+# SQLModel
 from sqlmodel import Session, select
 
-# Typing utilities
+# Typing
 from typing import Annotated, List
 
-# Database models
+# Models
 from app.models.post import Post
 from app.models.user import User
 
-# Schemas for request/response validation
+# Schemas
 from app.schemas.post import PostCreate, PostRead, PostUpdate
 
-# Database session dependency
+# DB
 from app.db.database import get_session
 
-# Auth dependency to get current authenticated user
+# Auth
 from app.services.auth import get_current_user
 
-# Reusable DB session dependency
 SessionDep = Annotated[Session, Depends(get_session)]
 
-
-# Router for post-related endpoints
 router = APIRouter(
-    prefix="/posts", # Base route
-    tags=["posts"]   # Swagger grouping
+    prefix="/posts",
+    tags=["posts"]
 )
 
-# CREATE POST
-@router.post("/", response_model=PostRead, status_code=201)
-def create_post(post_create: PostCreate, session: SessionDep,
-                current_user: User = Depends(get_current_user)):
-    
-    # Validate that title is not empty or just whitespace
-    if not post_create.title.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Title cannot be empty"
-        )
 
-    # Create new post linked to current user
+# =========================
+# HELPER
+# =========================
+def get_post_or_404(session: Session, post_id: int) -> Post:
+    post = session.get(Post, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
+
+
+# =========================
+# CREATE POST
+# =========================
+@router.post("/", response_model=PostRead, status_code=201)
+def create_post(
+    post_create: PostCreate,
+    session: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
     new_post = Post(
         title=post_create.title,
         content=post_create.content,
         author_id=current_user.id
     )
 
-    # Save to database
     session.add(new_post)
     session.commit()
-
-    # Refresh to get DB-generated values (e.g., ID)
     session.refresh(new_post)
 
-    # Return created post
-    return new_post
+    # 🔥 IMPORTANTE: devolver schema completo
+    return PostRead(
+        id=new_post.id,
+        title=new_post.title,
+        content=new_post.content,
+        author_id=new_post.author_id,
+        author_username=current_user.username
+    )
 
 
+# =========================
 # GET ALL POSTS
+# =========================
 @router.get("/", response_model=List[PostRead])
 def read_posts(session: SessionDep):
 
-    # Query all posts
-    statement = select(Post)
-    posts = session.exec(statement).all()
+    statement = (
+        select(Post, User)
+        .join(User, Post.author_id == User.id)
+        .order_by(Post.id.desc())  # 🔥 importante
+    )
 
-    # Return list of posts
-    return posts
+    results = session.exec(statement).all()
+
+    return [
+        PostRead(
+            id=post.id,
+            title=post.title,
+            content=post.content,
+            author_id=post.author_id,
+            author_username=user.username
+        )
+        for post, user in results
+    ]
 
 
+# =========================
 # GET SINGLE POST
+# =========================
 @router.get("/{post_id}", response_model=PostRead)
 def read_post(post_id: int, session: SessionDep):
 
-    # Retrieve post by ID
-    post = session.get(Post, post_id)
+    statement = (
+        select(Post, User)
+        .join(User, Post.author_id == User.id)
+        .where(Post.id == post_id)
+    )
 
+    result = session.exec(statement).first()
 
-    # If not found error 404
-    if not post:
+    if not result:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    # Return post
-    return post
+    post, user = result
+
+    return PostRead(
+        id=post.id,
+        title=post.title,
+        content=post.content,
+        author_id=post.author_id,
+        author_username=user.username
+    )
 
 
+# =========================
 # UPDATE POST
+# =========================
 @router.patch("/{post_id}", response_model=PostRead)
 def update_post(
     post_id: int,
@@ -96,68 +131,44 @@ def update_post(
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
-    # 1. Retrieve post
-    post = session.get(Post, post_id)
+    post = get_post_or_404(session, post_id)
 
-    if not post:
-        raise HTTPException(
-            status_code=404,
-            detail="Post not found"
-        )
-
-    # 2. Authorization check (only author can update)
     if post.author_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized")
 
-    # 3. Extract only provided fields (partial update)
     update_data = post_update.model_dump(exclude_unset=True)
 
-    # 4. Validate title if provided
-    if "title" in update_data and not update_data["title"].strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Title cannot be empty"
-        )
-
-    # 5. Apply updates dynamically
     for key, value in update_data.items():
         setattr(post, key, value)
 
-    # 6. Save changes
     session.add(post)
     session.commit()
     session.refresh(post)
 
-    # Return updated post
-    return post
+    return PostRead(
+        id=post.id,
+        title=post.title,
+        content=post.content,
+        author_id=post.author_id,
+        author_username=current_user.username
+    )
 
 
+# =========================
 # DELETE POST
-@router.delete("/{post_id}",status_code=200)
-def delete_post(post_id: int, session: SessionDep, current_user: User = Depends(get_current_user)):
+# =========================
+@router.delete("/{post_id}", status_code=204)
+def delete_post(
+    post_id: int,
+    session: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
+    post = get_post_or_404(session, post_id)
 
-    # Retrieve post
-    post = session.get(Post, post_id)
-
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-
-    # Authorization check (only author can delete)
     if post.author_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized")
 
-    # Delete post
     session.delete(post)
     session.commit()
 
-    # Return confirmation
-    return {
-    "message": "Deleted successfully",
-    "id": post.id
-}
+    return

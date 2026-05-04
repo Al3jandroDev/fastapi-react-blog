@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlmodel import SQLModel
 
 # USER SCHEMAS (DTOs)
@@ -38,3 +39,9 @@ class UserRead(SQLModel):
 class Token(SQLModel):
     access_token: str
     token_type: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    username: str
+
