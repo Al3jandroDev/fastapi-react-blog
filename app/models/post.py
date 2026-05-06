@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 
 # POST MODEL
@@ -41,3 +41,9 @@ class Post(SQLModel, table=True):
     # Foreign key linking the post to a user
     # References user.id in the User table
     author_id: int = Field(foreign_key="user.id")
+
+
+    author: Optional["User"] = Relationship(back_populates="posts")
+
+from app.models.user import User
+

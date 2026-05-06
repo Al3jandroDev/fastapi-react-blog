@@ -150,7 +150,7 @@ def update_post(
         title=post.title,
         content=post.content,
         author_id=post.author_id,
-        author_username=current_user.username
+        author_username=post.author.username
     )
 
 

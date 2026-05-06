@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPosts, deletePost, updatePost } from "../api/posts";
 
-export default function Posts({ posts, setPosts }) {
+export default function Posts({ posts, setPosts, onDelete, user  }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -9,20 +9,6 @@ export default function Posts({ posts, setPosts }) {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  const loadPosts = async () => {
-    try {
-      const data = await getPosts();
-      setPosts(data);
-    } catch {
-      setError("Failed to load posts");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this post?")) return;
@@ -64,7 +50,7 @@ export default function Posts({ posts, setPosts }) {
     }
   };
 
-  if (loading) return <div className="loading">Loading posts...</div>;
+  if (!posts.length) return <p>No posts yet</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
@@ -102,14 +88,16 @@ export default function Posts({ posts, setPosts }) {
 
               <small>👤 @{post.author_username}</small>
 
-              <div className="post-actions">
-                <button onClick={() => startEdit(post)}>
-                  Edit
-                </button>
-                <button onClick={() => handleDelete(post.id)}>
-                  Delete
-                </button>
-              </div>
+              {user?.id === post.author_id && (
+                <div className="post-actions">
+                  <button onClick={() => startEdit(post)}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(post.id)}>
+                    Delete
+                  </button>
+                </div>
+              )}
             </>
           )}
 

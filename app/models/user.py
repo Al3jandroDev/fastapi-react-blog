@@ -1,5 +1,5 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from typing import Optional, List
+from sqlmodel import SQLModel, Field, Relationship
 
 
 # USER MODEL
@@ -34,3 +34,7 @@ class User(SQLModel, table=True):
     # PASSWORD HASH
     # Secure hashed password
     password_hash: str
+
+    posts: List["Post"] = Relationship(back_populates="author")
+
+from app.models.post import Post
