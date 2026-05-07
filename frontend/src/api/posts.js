@@ -4,7 +4,7 @@ import API_URL from "./client";
  * Fetch all posts
  */
 export async function getPosts() {
-  const res = await fetch(`${API_URL}/posts`);
+  const res = await fetch(`${API_URL}/posts/`);
 
   if (!res.ok) {
     throw new Error("Error fetching posts");

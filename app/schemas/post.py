@@ -2,6 +2,7 @@ from pydantic import field_validator
 from sqlmodel import SQLModel
 
 
+
 # POST SCHEMAS (DTOs)
 # These classes define how post data is sent and received via the API
 # They are NOT database models
@@ -31,6 +32,8 @@ class PostRead(SQLModel):
     content: str
     author_id: int
     author_username: str
+    likes_count: int = 0
+    liked_by_me: bool = False
 
 
 # POST UPDATE SCHEMA

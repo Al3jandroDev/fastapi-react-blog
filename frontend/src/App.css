@@ -246,3 +246,48 @@ html, body {
 .create-post h2 {
   margin-bottom: 15px;
 }
+
+.post-like {
+  margin-top: 10px;
+}
+
+.post-like button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+
+  padding: 0;
+
+  transition: transform 0.15s ease;
+}
+
+.post-like button:hover {
+  transform: scale(1.08);
+}
+
+
+.profile-container {
+  max-width: 700px;
+  margin: 20px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.profile-header {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.avatar {
+  font-size: 40px;
+}
+
+.profile-post {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}

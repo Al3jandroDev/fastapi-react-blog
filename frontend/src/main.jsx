@@ -10,18 +10,20 @@ import './App.css'
 // Root App component
 import App from './App.jsx'
 
+import { BrowserRouter } from "react-router-dom";
+
 
 /**
  * Application entry point
  * Mounts the React app into the HTML DOM
  */
-createRoot(document.getElementById('root')).render(
 
-  // StrictMode runs extra checks in development
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    {/* Main application component */}
-    <App />
-  </StrictMode>,
-)
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+);
 
 

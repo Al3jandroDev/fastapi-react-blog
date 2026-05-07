@@ -115,3 +115,18 @@ def get_me(current_user: User = Depends(get_current_user)):
         "username": current_user.username,
         "email": current_user.email,
     }
+
+
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, session: SessionDep):
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(404)
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "bio": user.bio,
+        "posts": user.posts
+    }

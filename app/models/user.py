@@ -35,6 +35,11 @@ class User(SQLModel, table=True):
     # Secure hashed password
     password_hash: str
 
+    bio: Optional[str] = None
+
     posts: List["Post"] = Relationship(back_populates="author")
 
+    likes: list["Like"] = Relationship(back_populates="user")
+
+from app.models.like import Like
 from app.models.post import Post

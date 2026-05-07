@@ -44,6 +44,8 @@ class Post(SQLModel, table=True):
 
 
     author: Optional["User"] = Relationship(back_populates="posts")
+    likes: list["Like"] = Relationship(back_populates="post")
 
+from app.models.like import Like
 from app.models.user import User
 

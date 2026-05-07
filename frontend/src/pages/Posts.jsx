@@ -1,24 +1,21 @@
-import { useEffect, useState } from "react";
-import { getPosts, deletePost, updatePost } from "../api/posts";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Posts({ posts, setPosts, onDelete, user  }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+import { deletePost, updatePost } from "../api/posts";
+import { likePost, unlikePost } from "../api/likes";
+
+export default function Posts({ posts, setPosts, user }) {
+  const navigate = useNavigate();
 
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-
   const handleDelete = async (id) => {
     if (!confirm("Delete this post?")) return;
 
-    try {
-      await deletePost(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      alert("Error deleting post");
-    }
+    await deletePost(id);
+    setPosts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const startEdit = (post) => {
@@ -34,24 +31,51 @@ export default function Posts({ posts, setPosts, onDelete, user  }) {
   };
 
   const handleUpdate = async (id) => {
-    try {
-      const updated = await updatePost(id, {
-        title: editTitle,
-        content: editContent,
-      });
+    const updated = await updatePost(id, {
+      title: editTitle,
+      content: editContent,
+    });
+
+    setPosts((prev) =>
+      prev.map((p) => (p.id === id ? updated : p))
+    );
+
+    cancelEdit();
+  };
+
+  const handleLike = async (post) => {
+    if (post.liked_by_me) {
+      await unlikePost(post.id);
 
       setPosts((prev) =>
-        prev.map((p) => (p.id === id ? updated : p))
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+              ...p,
+              liked_by_me: false,
+              likes_count: p.likes_count - 1,
+            }
+            : p
+        )
       );
+    } else {
+      await likePost(post.id);
 
-      cancelEdit();
-    } catch {
-      alert("Error updating post");
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+              ...p,
+              liked_by_me: true,
+              likes_count: p.likes_count + 1,
+            }
+            : p
+        )
+      );
     }
   };
 
   if (!posts.length) return <p>No posts yet</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className="posts">
@@ -86,7 +110,20 @@ export default function Posts({ posts, setPosts, onDelete, user  }) {
               <h3>{post.title}</h3>
               <p>{post.content}</p>
 
-              <small>👤 @{post.author_username}</small>
+              {/* 👇 CLICKABLE USERNAME */}
+              <small
+                style={{ cursor: "pointer", color: "#3b82f6" }}
+                onClick={() => navigate(`/users/${post.author_id}`)}
+              >
+                👤 @{post.author_username}
+              </small>
+
+              <div className="post-like">
+                <button onClick={() => handleLike(post)}>
+                  {post.liked_by_me ? "❤️" : "🤍"}{" "}
+                  {post.likes_count}
+                </button>
+              </div>
 
               {user?.id === post.author_id && (
                 <div className="post-actions">
@@ -100,7 +137,6 @@ export default function Posts({ posts, setPosts, onDelete, user  }) {
               )}
             </>
           )}
-
         </div>
       ))}
     </div>
