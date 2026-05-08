@@ -35,7 +35,7 @@ class User(SQLModel, table=True):
     # Secure hashed password
     password_hash: str
 
-    bio: Optional[str] = None
+    bio: Optional[str] = "Fullstack developer 🚀"
 
     posts: List["Post"] = Relationship(back_populates="author")
 

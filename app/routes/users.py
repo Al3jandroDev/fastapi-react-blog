@@ -22,23 +22,23 @@ def get_user(user_id: int, session: SessionDep):
     user = session.get(User, user_id)
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(404)
 
-    # traer posts del usuario
-    statement = select(Post).where(Post.author_id == user.id)
-    posts = session.exec(statement).all()
+    posts = session.exec(
+        select(Post).where(Post.author_id == user_id)
+    ).all()
 
     return {
-        "id": user.id,
-        "username": user.username,
-        "bio": user.bio,
-        "posts": [
-            {
-                "id": p.id,
-                "title": p.title,
-                "content": p.content,
-                "created_at": p.created_at
-            }
-            for p in posts
-        ]
-    }
+    "id": user.id,
+    "username": user.username,
+    "bio": user.bio,
+    "posts": [
+        {
+            "id": p.id,
+            "title": p.title,
+            "content": p.content,
+            "created_at": p.created_at
+        }
+        for p in posts
+    ]
+}

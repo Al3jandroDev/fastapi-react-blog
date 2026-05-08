@@ -115,18 +115,25 @@ html, body {
   font-weight: 500;
 }
 
-.navbar button {
-  background: #ef4444;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  color: white;
+/* USER BUTTON (perfil) */
+.nav-user-btn {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 7px 12px;
+  border-radius: 20px;
   cursor: pointer;
+  font-size: 14px;
+  color: #1d4ed8;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.navbar button:hover {
-  background: #dc2626;
+.nav-user-btn:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
 }
+
 
 /* MAIN LAYOUT */
 .main-content {
@@ -227,20 +234,21 @@ html, body {
   width: 100%;
   padding: 12px;
 
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
 
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
 
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.25);
 }
 
 .create-post h2 {
@@ -252,20 +260,23 @@ html, body {
 }
 
 .post-like button {
-  border: none;
-  background: transparent;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   cursor: pointer;
-  font-size: 18px;
-
-  padding: 0;
-
-  transition: transform 0.15s ease;
+  font-size: 16px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .post-like button:hover {
-  transform: scale(1.08);
+  background: #f3f4f6;
+  border-color: #3b82f6;
+  transform: scale(1.05);
 }
-
 
 .profile-container {
   max-width: 700px;
@@ -284,10 +295,45 @@ html, body {
 }
 
 .avatar {
-  font-size: 40px;
+  font-size: 50px;
 }
 
 .profile-post {
-  padding: 12px;
+  padding: 14px 0;
   border-bottom: 1px solid #eee;
+}
+
+
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #eff6ff;
+  color: #1d4ed8;
+
+  border: 1px solid #bfdbfe;
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.back-btn:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+}
+
+.back-btn:active {
+  transform: scale(0.97);
 }

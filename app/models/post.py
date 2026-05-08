@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 
@@ -44,7 +44,10 @@ class Post(SQLModel, table=True):
 
 
     author: Optional["User"] = Relationship(back_populates="posts")
-    likes: list["Like"] = Relationship(back_populates="post")
+    likes: List["Like"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
 from app.models.like import Like
 from app.models.user import User

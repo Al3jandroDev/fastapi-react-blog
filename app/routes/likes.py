@@ -3,84 +3,77 @@ from sqlmodel import Session, select
 from typing import Annotated
 
 from app.db.database import get_session
-
 from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
 
+from app.routes.posts import get_post_or_404
 from app.services.auth import get_current_user
+
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(
-    prefix="/posts",
+    prefix="/likes",
     tags=["likes"]
 )
 
 
 # =========================
-# LIKE POST
+# TOGGLE LIKE (LIKE / UNLIKE)
 # =========================
-@router.post("/{post_id}/like", status_code=201)
-def like_post(
+@router.post("/{post_id}")
+def toggle_like(
     post_id: int,
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
 
-    # Check post exists
-    post = session.get(Post, post_id)
+    # 🔥 asegura que el post exista
+    _ = get_post_or_404(session, post_id)
 
-    if not post:
-        raise HTTPException(
-            status_code=404,
-            detail="Post not found"
+    # 🔍 buscar like existente
+    existing = session.exec(
+        select(Like).where(
+            Like.post_id == post_id,
+            Like.user_id == current_user.id
         )
+    ).first()
 
-    # Prevent duplicate likes
-    statement = select(Like).where(
-        Like.user_id == current_user.id,
-        Like.post_id == post_id
-    )
+    # ❤️ si existe → unlike
+    if existing:
+        session.delete(existing)
+        session.commit()
+        return {"liked": False}
 
-    existing_like = session.exec(statement).first()
-
-    if existing_like:
-        raise HTTPException(
-            status_code=400,
-            detail="Post already liked"
-        )
-
-    # Create like
+    # 💙 si no existe → like
     new_like = Like(
-        user_id=current_user.id,
-        post_id=post_id
+        post_id=post_id,
+        user_id=current_user.id
     )
 
     session.add(new_like)
     session.commit()
 
-    return {
-        "message": "Post liked"
-    }
+    return {"liked": True}
 
 
 # =========================
-# UNLIKE POST
+# DELETE LIKE (OPCIONAL)
 # =========================
-@router.delete("/{post_id}/like")
+@router.delete("/{post_id}")
 def unlike_post(
     post_id: int,
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
 
-    statement = select(Like).where(
-        Like.user_id == current_user.id,
-        Like.post_id == post_id
-    )
-
-    like = session.exec(statement).first()
+    like = session.exec(
+        select(Like).where(
+            Like.user_id == current_user.id,
+            Like.post_id == post_id
+        )
+    ).first()
 
     if not like:
         raise HTTPException(
@@ -91,6 +84,4 @@ def unlike_post(
     session.delete(like)
     session.commit()
 
-    return {
-        "message": "Post unliked"
-    }
+    return {"message": "Post unliked"}

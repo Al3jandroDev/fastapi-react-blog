@@ -1,129 +1,223 @@
 import { useEffect, useState } from "react";
+
+import {
+  Routes,
+  Route,
+} from "react-router-dom";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
+import Profile from "./pages/Profile";
 
 import { getPosts } from "./api/posts";
 import { getMe } from "./api/auth";
+import { useNavigate } from "react-router-dom";
+
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  const [token, setToken] = useState(
+    localStorage.getItem("token")
+  );
+
   const [user, setUser] = useState(null);
+
   const [posts, setPosts] = useState([]);
 
-  // 👉 controla si estás en login o register
   const [isRegistering, setIsRegistering] = useState(false);
+  const navigate = useNavigate();
 
+
+
+
+
+  // ======================
+  // LOAD DATA
+  // ======================
   useEffect(() => {
-    if (!token) return;
 
-    (async () => {
-      await Promise.all([loadUser(), loadPosts()]);
-    })();
+    loadPosts();
+
+    if (token) {
+      loadUser();
+    }
+
   }, [token]);
+
 
   // ======================
   // LOAD USER
   // ======================
   const loadUser = async () => {
+
     try {
+
       const data = await getMe();
+
       setUser(data);
+
     } catch (err) {
+
       console.error("Failed to load user", err);
     }
   };
+
 
   // ======================
   // LOAD POSTS
   // ======================
   const loadPosts = async () => {
-    const data = await getPosts();
-    setPosts(data);
+
+    try {
+
+      const data = await getPosts();
+
+      setPosts(data);
+
+    } catch (err) {
+
+      console.error(err);
+    }
   };
 
+
   // ======================
-  // CREATE POST UPDATE UI
+  // NEW POST UI UPDATE
   // ======================
   const handleNewPost = (newPost) => {
+
     setPosts((prev) => [newPost, ...prev]);
   };
 
-  // ======================
-  // DELETE POST UPDATE UI
-  // ======================
-  const handleDelete = (id) => {
-    setPosts((prev) => prev.filter((p) => p.id !== id));
-  };
 
   // ======================
   // LOGIN
   // ======================
   const handleLogin = (access_token) => {
+
     setToken(access_token);
-    localStorage.setItem("token", access_token);
+
+    localStorage.setItem(
+      "token",
+      access_token
+    );
   };
+
 
   // ======================
   // LOGOUT
   // ======================
   const handleLogout = () => {
+
     localStorage.removeItem("token");
+
     setToken(null);
+
     setUser(null);
   };
 
+
   // ======================
-  // AUTH VIEW (LOGIN / REGISTER)
+  // LOGIN / REGISTER VIEW
   // ======================
   if (!token) {
+
     return isRegistering ? (
-      <Register onSwitchToLogin={() => setIsRegistering(false)} />
+
+      <Register
+        onSwitchToLogin={() =>
+          setIsRegistering(false)
+        }
+      />
+
     ) : (
+
       <Login
         onLogin={handleLogin}
-        onSwitchToRegister={() => setIsRegistering(true)}
+        onSwitchToRegister={() =>
+          setIsRegistering(true)
+        }
       />
     );
   }
 
+
   // ======================
-  // APP LOGGED IN
+  // MAIN APP
   // ======================
   return (
+
     <div className="app-container">
 
       {/* NAVBAR */}
       <nav className="navbar">
-        <h2>FastAPI Blog CMS</h2>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <span>
-            {user ? `👤 @${user.username}` : "👤 loading..."}
-          </span>
+        <h2
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        >
+          FastAPI Social
+        </h2>
 
-          <button onClick={handleLogout}>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+          }}
+        >
+
+          <button
+            className="nav-user-btn"
+            onClick={() => navigate(`/users/${user.id}`)}
+          >
+            👤 @{user?.username}
+          </button>
+
+          <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
+
         </div>
+
       </nav>
 
-      {/* MAIN CONTENT */}
-      <main className="main-content">
 
-        {/* CREATE POST */}
-        <CreatePost onPostCreated={handleNewPost} />
+      {/* ROUTES */}
+      <Routes>
 
-        {/* POSTS FEED */}
-        <Posts
-          posts={posts}
-          setPosts={setPosts}
-          onDelete={handleDelete}
-          user={user}
+        {/* HOME FEED */}
+        <Route
+          path="/"
+          element={
+
+            <main className="main-content">
+
+              <CreatePost
+                onPostCreated={handleNewPost}
+              />
+
+              <Posts
+                posts={posts}
+                setPosts={setPosts}
+                user={user}
+              />
+
+            </main>
+          }
         />
 
-      </main>
+
+        {/* USER PROFILE */}
+        <Route
+          path="/users/:id"
+          element={<Profile />}
+        />
+
+
+      </Routes>
 
     </div>
   );

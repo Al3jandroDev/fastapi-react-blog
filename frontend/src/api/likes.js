@@ -5,12 +5,10 @@ import API_URL from "./client";
  * Like a post
  */
 export async function likePost(postId) {
-
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`${API_URL}/posts/${postId}/like`, {
+  const res = await fetch(`${API_URL}/likes/${postId}`, {
     method: "POST",
-
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -24,17 +22,14 @@ export async function likePost(postId) {
   return await res.json();
 }
 
-
 /**
  * Unlike a post
  */
 export async function unlikePost(postId) {
-
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`${API_URL}/posts/${postId}/like`, {
+  const res = await fetch(`${API_URL}/likes/${postId}`, {
     method: "DELETE",
-
     headers: {
       Authorization: `Bearer ${token}`,
     },
