@@ -49,6 +49,16 @@ class Post(SQLModel, table=True):
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
+    comments: List["Comment"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan",
+            "passive_deletes": True
+        }
+    )
+
+
 from app.models.like import Like
 from app.models.user import User
+from app.models.comment import Comment
 

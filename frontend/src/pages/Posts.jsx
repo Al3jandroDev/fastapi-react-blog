@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { deletePost, updatePost } from "../api/posts";
 import { likePost, unlikePost } from "../api/likes";
+import Comments from "../pages/Comments";
 
 export default function Posts({ posts, setPosts, user }) {
   const navigate = useNavigate();
@@ -141,6 +142,8 @@ export default function Posts({ posts, setPosts, user }) {
 
                   {post.likes_count}
                 </button>
+
+                <Comments postId={post.id} />
 
               </div>
 

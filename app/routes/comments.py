@@ -1,94 +1,124 @@
-# FastAPI imports for routing, dependency injection, and error handling
-from fastapi import APIRouter, Depends, HTTPException, status
-
-# SQLModel for database operations
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-
-# Typing utilities
 from typing import Annotated, List
 
-# Database models
+from app.db.database import get_session
+
 from app.models.comment import Comment
 from app.models.post import Post
 from app.models.user import User
 
-# Schemas (request/response validation)
 from app.schemas.comment import CommentCreate, CommentRead
 
-# Database session dependency
-from app.db.database import get_session
-
-# Auth dependency to get current logged-in user
 from app.services.auth import get_current_user
 
-# Reusable DB session dependency
 SessionDep = Annotated[Session, Depends(get_session)]
 
-# Router for comment-related endpoints
 router = APIRouter(
-    prefix="/comments",  # Base route
-    tags=["comments"]    # Swagger grouping
+    prefix="/comments",
+    tags=["comments"]
 )
 
 
+# =========================
 # CREATE COMMENT
-@router.post("/{post_id}/comments", response_model=CommentRead, status_code=201)
+# =========================
+@router.post("/{post_id}", response_model=CommentRead, status_code=201)
 def create_comment(
     post_id: int,
     comment: CommentCreate,
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
-    
-    # Check if the post exists
+
     post = session.get(Post, post_id)
 
     if not post:
-        raise HTTPException(404, "Post not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found"
+        )
 
-    # Optional validation: prevent empty comments
     if not comment.content.strip():
         raise HTTPException(
             status_code=400,
             detail="Comment cannot be empty"
         )
 
-    # Create new comment linked to post and current user
     new_comment = Comment(
         content=comment.content,
         post_id=post_id,
-        author_id=current_user.id
+        user_id=current_user.id
     )
 
-    # Save to database
     session.add(new_comment)
     session.commit()
-
-    # Refresh to get DB-generated fields (e.g., ID)
     session.refresh(new_comment)
 
-    # Return created comment
-    return new_comment
+    return CommentRead(
+    id=new_comment.id,
+    content=new_comment.content,
+    post_id=new_comment.post_id,
+    author_id=new_comment.author_id,
+    username=current_user.username,
+    created_at=new_comment.created_at,
+    )
 
 
-# GET COMMENTS FOR A POST
-@router.get("/{post_id}/comments", response_model=List[CommentRead])
-def get_comments(post_id: int, session: SessionDep):
+# =========================
+# GET COMMENTS BY POST
+# =========================
+@router.get("/{post_id}", response_model=List[CommentRead])
+def get_comments(
+    post_id: int,
+    session: SessionDep
+):
 
-    # Query all comments for a given post
-    statement = select(Comment).where(Comment.post_id == post_id)
+    post = session.get(Post, post_id)
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found"
+        )
+
+    statement = (
+        select(Comment)
+        .where(Comment.post_id == post_id)
+        .order_by(Comment.created_at.desc())
+    )
+
     comments = session.exec(statement).all()
 
-    # Return list of comments
-    return comments
+    result = []
+
+    for c in comments:
+        user = session.get(User, c.user_id)
+
+        result.append(
+    CommentRead.model_validate({
+        "id": c.id,
+        "content": c.content,
+        "post_id": c.post_id,
+        "author_id": c.user_id,
+        "username": user.username if user else None,
+        "created_at": c.created_at,
+    })
+)
+
+    return result
 
 
+# =========================
 # DELETE COMMENT
-@router.delete("/{comment_id}", status_code=200)
-def delete_comment(comment_id: int, session: SessionDep,
-                current_user: User = Depends(get_current_user)):
+# =========================
+@router.delete("/{comment_id}")
+def delete_comment(
+    comment_id: int,
+    session: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
 
-    # 1. Retrieve comment by ID
     comment = session.get(Comment, comment_id)
 
     if not comment:
@@ -97,19 +127,15 @@ def delete_comment(comment_id: int, session: SessionDep,
             detail="Comment not found"
         )
 
-    # 2. Check ownership (only author can delete)
-    if comment.author_id != current_user.id:
+    if comment.user_id != current_user.id:
         raise HTTPException(
             status_code=403,
-            detail="Not authorized to delete this comment"
+            detail="Not authorized"
         )
 
-    # 3. Delete comment from database
     session.delete(comment)
     session.commit()
 
-    # Return confirmation
     return {
-        "message": "Comment deleted successfully",
-        "id": comment.id
+        "message": "Comment deleted"
     }

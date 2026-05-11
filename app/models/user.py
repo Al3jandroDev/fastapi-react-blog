@@ -40,6 +40,10 @@ class User(SQLModel, table=True):
     posts: List["Post"] = Relationship(back_populates="author")
 
     likes: list["Like"] = Relationship(back_populates="user")
+    
+    comments: list["Comment"] = Relationship(back_populates="user")
+
 
 from app.models.like import Like
 from app.models.post import Post
+from app.models.comment import Comment

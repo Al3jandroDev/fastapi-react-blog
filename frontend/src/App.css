@@ -349,3 +349,51 @@ html, body {
 .back-btn:active {
   transform: scale(0.97);
 }
+
+
+.comments {
+  margin-top: 15px;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.comment-form input {
+  flex: 1;
+
+  padding: 10px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  outline: none;
+}
+
+.comment-form button {
+  border: none;
+
+  background: #3b82f6;
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.comments-list {
+  margin-top: 12px;
+}
+
+.comment {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.comment p {
+  margin: 5px 0 0 0;
+}

@@ -23,6 +23,11 @@ class CommentRead(SQLModel):
     content: str
     post_id: int
     author_id: int
+    username: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True  
 
 
 # COMMENT UPDATE SCHEMA

@@ -1,41 +1,29 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field
 from datetime import datetime
+from typing import Optional
+
+from sqlmodel import Column, ForeignKey, SQLModel, Field, Relationship
 
 
-# COMMENT MODEL
-# This model represents a comment made by a user on a post
-# It is mapped to a database table via SQLModel
 class Comment(SQLModel, table=True):
-    """
-    Database model for comments.
 
-    Each comment:
-    - belongs to a user (author)
-    - belongs to a post
-    - contains text content
-    - has a creation timestamp
-    """
+    __tablename__ = "comment"
 
-    # PRIMARY KEY
-    # Unique identifier for each comment
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None,primary_key=True)
 
-    # CONTENT
-    # The text/body of the comment
     content: str
 
-    # RELATION: USER (AUTHOR)
-    # Foreign key linking the comment to a user
-    # References user.id in the User table
-    author_id: int = Field(foreign_key="user.id")
-
-    # TIMESTAMP
-    # Automatically set when the comment is created
-    # Uses UTC time to avoid timezone issues
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # RELATION: POST
-    # Foreign key linking the comment to a post
-    # References post.id in the Post table
-    post_id: int = Field(foreign_key="post.id")
+    # FK
+    user_id: int = Field(foreign_key="user.id")
+
+    post_id: int = Field(foreign_key="post.id", nullable=False)
+
+    # relationships
+    user: "User" = Relationship(back_populates="comments")
+
+    post: "Post" = Relationship(back_populates="comments")
+
+
+from app.models.user import User
+from app.models.post import Post
