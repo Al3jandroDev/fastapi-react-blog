@@ -259,23 +259,35 @@ html, body {
   margin-top: 10px;
 }
 
-.post-like button {
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+.like-btn {
+  border: none;
+  background: #f3f4f6;
+
   cursor: pointer;
-  font-size: 16px;
-  padding: 6px 10px;
-  border-radius: 20px;
+
+  font-size: 15px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
   transition: all 0.2s ease;
+
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+
+  font-weight: 500;
 }
 
-.post-like button:hover {
-  background: #f3f4f6;
-  border-color: #3b82f6;
-  transform: scale(1.05);
+.like-btn:hover {
+  transform: scale(1.15);
+  background: #e5e7eb;
+}
+
+.like-btn.liked {
+  background: #fee2e2;
+  color: #ef4444;
 }
 
 .profile-container {

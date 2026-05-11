@@ -44,30 +44,42 @@ export default function Posts({ posts, setPosts, user }) {
   };
 
   const handleLike = async (post) => {
-    if (post.liked_by_me) {
-      await unlikePost(post.id);
 
+    // ⚡ optimistic UI
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === post.id
+          ? {
+            ...p,
+            liked_by_me: !p.liked_by_me,
+            likes_count: p.liked_by_me
+              ? p.likes_count - 1
+              : p.likes_count + 1,
+          }
+          : p
+      )
+    );
+
+    try {
+
+      if (post.liked_by_me) {
+        await unlikePost(post.id);
+      } else {
+        await likePost(post.id);
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+      // rollback si falla backend
       setPosts((prev) =>
         prev.map((p) =>
           p.id === post.id
             ? {
               ...p,
-              liked_by_me: false,
-              likes_count: p.likes_count - 1,
-            }
-            : p
-        )
-      );
-    } else {
-      await likePost(post.id);
-
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === post.id
-            ? {
-              ...p,
-              liked_by_me: true,
-              likes_count: p.likes_count + 1,
+              liked_by_me: post.liked_by_me,
+              likes_count: post.likes_count,
             }
             : p
         )
@@ -119,10 +131,17 @@ export default function Posts({ posts, setPosts, user }) {
               </small>
 
               <div className="post-like">
-                <button onClick={() => handleLike(post)}>
-                  {post.liked_by_me ? "❤️" : "🤍"}{" "}
+
+                <button
+                  className={`like-btn ${post.liked_by_me ? "liked" : ""
+                    }`}
+                  onClick={() => handleLike(post)}
+                >
+                  {post.liked_by_me ? "❤️" : "🤍"}
+
                   {post.likes_count}
                 </button>
+
               </div>
 
               {user?.id === post.author_id && (
