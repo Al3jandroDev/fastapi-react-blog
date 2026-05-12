@@ -13,42 +13,50 @@ export default function Comments({ postId }) {
   const [content, setContent] = useState("");
 
 
+  // =========================
+  // LOAD COMMENTS
+  // =========================
   useEffect(() => {
-    loadComments();
-  }, []);
+
+    const fetchComments = async () => {
+
+      try {
+
+        const data = await getComments(postId);
+
+        setComments(data);
+
+      } catch (err) {
+
+        console.error(err);
+      }
+    };
+
+    fetchComments();
+
+  }, [postId]);
 
 
-  const loadComments = async () => {
-
-    try {
-
-      const data = await getComments(postId);
-
-      setComments(data);
-
-    } catch (err) {
-
-      console.error(err);
-    }
-  };
-
-
+  // =========================
+  // CREATE COMMENT
+  // =========================
   const handleComment = async () => {
 
     if (!content.trim()) return;
 
     try {
 
-      const newComment = await createComment(
-        postId,
-        content
-      );
+      // crear comentario
+      await createComment(postId, content);
 
-      setComments((prev) => [
-        newComment,
-        ...prev,
-      ]);
+      // pedir comentarios actualizados
+      const updatedComments =
+        await getComments(postId);
 
+      // actualizar estado
+      setComments(updatedComments);
+
+      // limpiar input
       setContent("");
 
     } catch (err) {
@@ -67,6 +75,7 @@ export default function Comments({ postId }) {
       </small>
 
 
+      {/* FORM */}
       <div className="comment-form">
 
         <input
@@ -85,6 +94,7 @@ export default function Comments({ postId }) {
       </div>
 
 
+      {/* COMMENTS LIST */}
       <div className="comments-list">
 
         {comments.map((comment) => (
@@ -103,6 +113,7 @@ export default function Comments({ postId }) {
             </p>
 
           </div>
+
         ))}
 
       </div>

@@ -2,6 +2,13 @@ from typing import List, Optional
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.like import Like
+    from app.models.comment import Comment
+
 # POST MODEL
 # This model represents a blog post created by a user
 # It is mapped to the "post" table in the database
@@ -58,7 +65,5 @@ class Post(SQLModel, table=True):
     )
 
 
-from app.models.like import Like
-from app.models.user import User
-from app.models.comment import Comment
+
 

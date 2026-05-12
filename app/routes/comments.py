@@ -59,7 +59,7 @@ def create_comment(
     id=new_comment.id,
     content=new_comment.content,
     post_id=new_comment.post_id,
-    author_id=new_comment.author_id,
+    author_id=new_comment.user_id,
     username=current_user.username,
     created_at=new_comment.created_at,
     )
@@ -83,36 +83,31 @@ def get_comments(
         )
 
     statement = (
-        select(Comment)
+        select(Comment, User)
+        .join(User, Comment.user_id == User.id)
         .where(Comment.post_id == post_id)
         .order_by(Comment.created_at.desc())
     )
 
-    comments = session.exec(statement).all()
+    results = session.exec(statement).all()
 
-    result = []
-
-    for c in comments:
-        user = session.get(User, c.user_id)
-
-        result.append(
-    CommentRead.model_validate({
-        "id": c.id,
-        "content": c.content,
-        "post_id": c.post_id,
-        "author_id": c.user_id,
-        "username": user.username if user else None,
-        "created_at": c.created_at,
-    })
-)
-
-    return result
+    return [
+        CommentRead(
+            id=comment.id,
+            content=comment.content,
+            post_id=comment.post_id,
+            author_id=comment.user_id,
+            username=user.username,
+            created_at=comment.created_at,
+        )
+        for comment, user in results
+    ]
 
 
 # =========================
 # DELETE COMMENT
 # =========================
-@router.delete("/{comment_id}")
+@router.delete("/{comment_id}", status_code=204)
 def delete_comment(
     comment_id: int,
     session: SessionDep,
@@ -136,6 +131,4 @@ def delete_comment(
     session.delete(comment)
     session.commit()
 
-    return {
-        "message": "Comment deleted"
-    }
+    return
