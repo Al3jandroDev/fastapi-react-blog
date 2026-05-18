@@ -3,47 +3,94 @@ import { useNavigate } from "react-router-dom";
 
 import { deletePost, updatePost } from "../api/posts";
 import { likePost, unlikePost } from "../api/likes";
-import Comments from "../pages/Comments";
 
-export default function Posts({ posts, setPosts, user }) {
+import Comments from "../pages/Comments";
+import FollowButton from "../pages/FollowButton";
+
+export default function Posts({
+  posts,
+  setPosts,
+  user
+}) {
+
+  // ✅ DEBUG
+  console.log("LOGGED USER ID:", user?.id);
+  console.log("POSTS:", posts);
+
+
   const navigate = useNavigate();
 
   const [editingId, setEditingId] = useState(null);
+
   const [editTitle, setEditTitle] = useState("");
+
   const [editContent, setEditContent] = useState("");
 
+
+  // =========================
+  // DELETE POST
+  // =========================
   const handleDelete = async (id) => {
+
     if (!confirm("Delete this post?")) return;
 
     await deletePost(id);
-    setPosts((prev) => prev.filter((p) => p.id !== id));
+
+    setPosts((prev) =>
+      prev.filter((p) => p.id !== id)
+    );
   };
 
+
+  // =========================
+  // START EDIT
+  // =========================
   const startEdit = (post) => {
+
     setEditingId(post.id);
+
     setEditTitle(post.title);
+
     setEditContent(post.content);
   };
 
+
+  // =========================
+  // CANCEL EDIT
+  // =========================
   const cancelEdit = () => {
+
     setEditingId(null);
+
     setEditTitle("");
+
     setEditContent("");
   };
 
+
+  // =========================
+  // UPDATE POST
+  // =========================
   const handleUpdate = async (id) => {
+
     const updated = await updatePost(id, {
       title: editTitle,
       content: editContent,
     });
 
     setPosts((prev) =>
-      prev.map((p) => (p.id === id ? updated : p))
+      prev.map((p) =>
+        p.id === id ? updated : p
+      )
     );
 
     cancelEdit();
   };
 
+
+  // =========================
+  // LIKE / UNLIKE
+  // =========================
   const handleLike = async (post) => {
 
     // ⚡ optimistic UI
@@ -64,8 +111,11 @@ export default function Posts({ posts, setPosts, user }) {
     try {
 
       if (post.liked_by_me) {
+
         await unlikePost(post.id);
+
       } else {
+
         await likePost(post.id);
       }
 
@@ -73,7 +123,7 @@ export default function Posts({ posts, setPosts, user }) {
 
       console.error(err);
 
-      // rollback si falla backend
+      // rollback backend error
       setPosts((prev) =>
         prev.map((p) =>
           p.id === post.id
@@ -88,79 +138,163 @@ export default function Posts({ posts, setPosts, user }) {
     }
   };
 
-  if (!posts.length) return <p>No posts yet</p>;
 
+  // =========================
+  // EMPTY STATE
+  // =========================
+
+  if (!user) {
+    return <p>Loading user...</p>;
+  }
+
+  if (!posts.length) {
+
+    return <p>No posts yet</p>;
+  }
+
+
+  // =========================
+  // RENDER
+  // =========================
   return (
+
     <div className="posts">
+
       <h2>Posts</h2>
 
-      {posts.map((post) => (
-        <div key={post.id} className="post">
 
-          {editingId === post.id ? (
-            <>
-              <input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
+      {posts.map((post) => {
+        return (
 
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-              />
+          <div
+            key={post.id}
+            className="post"
+          >
 
-              <div className="post-actions">
-                <button onClick={() => handleUpdate(post.id)}>
-                  Save
-                </button>
-                <button onClick={cancelEdit}>
-                  Cancel
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <h3>{post.title}</h3>
-              <p>{post.content}</p>
+            {editingId === post.id ? (
 
-              {/* 👇 CLICKABLE USERNAME */}
-              <small
-                style={{ cursor: "pointer", color: "#3b82f6" }}
-                onClick={() => navigate(`/users/${post.author_id}`)}
-              >
-                👤 @{post.author_username}
-              </small>
+              <>
+                <input
+                  value={editTitle}
+                  onChange={(e) =>
+                    setEditTitle(e.target.value)
+                  }
+                />
 
-              <div className="post-like">
+                <textarea
+                  value={editContent}
+                  onChange={(e) =>
+                    setEditContent(e.target.value)
+                  }
+                />
 
-                <button
-                  className={`like-btn ${post.liked_by_me ? "liked" : ""
-                    }`}
-                  onClick={() => handleLike(post)}
-                >
-                  {post.liked_by_me ? "❤️" : "🤍"}
-
-                  {post.likes_count}
-                </button>
-
-                <Comments postId={post.id} />
-
-              </div>
-
-              {user?.id === post.author_id && (
                 <div className="post-actions">
-                  <button onClick={() => startEdit(post)}>
-                    Edit
+
+                  <button
+                    onClick={() =>
+                      handleUpdate(post.id)
+                    }
+                  >
+                    Save
                   </button>
-                  <button onClick={() => handleDelete(post.id)}>
-                    Delete
+
+                  <button onClick={cancelEdit}>
+                    Cancel
                   </button>
+
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      ))}
+              </>
+
+            ) : (
+
+              <>
+                <h3>{post.title}</h3>
+
+                <p>{post.content}</p>
+
+
+                {/* USER + FOLLOW */}
+                <div className="post-user">
+
+                  <small
+                    style={{
+                      cursor: "pointer",
+                      color: "#3b82f6"
+                    }}
+                    onClick={() =>
+                      navigate(
+                        `/users/${post.author_id}`
+                      )
+                    }
+                  >
+                    👤 @{post.author_username}
+                  </small>
+
+
+                  {/* FOLLOW BUTTON */}
+                  {user?.id && post.author_id && Number(user.id) !== Number(post.author_id) && (
+                    <FollowButton
+                      userId={post.author_id}
+                    />
+                  )}
+
+                </div>
+
+
+                {/* LIKE + COMMENTS */}
+                <div className="post-like">
+
+                  <button
+                    className={`like-btn ${post.liked_by_me
+                        ? "liked"
+                        : ""
+                      }`}
+                    onClick={() =>
+                      handleLike(post)
+                    }
+                  >
+                    {post.liked_by_me
+                      ? "❤️"
+                      : "🤍"}
+
+                    {post.likes_count}
+                  </button>
+
+                  <Comments postId={post.id} />
+
+                </div>
+
+
+                {/* OWNER ACTIONS */}
+                {user?.id && post.author_id && Number(user.id) === Number(post.author_id) && (
+
+                  <div className="post-actions">
+
+                    <button
+                      onClick={() =>
+                        startEdit(post)
+                      }
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(post.id)
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+                )}
+
+              </>
+            )}
+
+          </div>
+        );
+      })}
     </div>
   );
 }

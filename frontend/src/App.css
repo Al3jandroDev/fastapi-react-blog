@@ -397,3 +397,27 @@ html, body {
 .comment p {
   margin: 5px 0 0 0;
 }
+
+
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.post-user button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: #3b82f6;
+  color: white;
+  font-size: 12px;
+  transition: 0.2s;
+}
+
+.post-user button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}

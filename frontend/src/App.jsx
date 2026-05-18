@@ -23,6 +23,7 @@ export default function App() {
   );
 
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(false);
 
   const [posts, setPosts] = useState([]);
 
@@ -42,6 +43,8 @@ export default function App() {
 
     if (token) {
       loadUser();
+    } else {
+      setLoadingUser(false);
     }
 
   }, [token]);
@@ -50,9 +53,12 @@ export default function App() {
   // ======================
   // LOAD USER
   // ======================
+
   const loadUser = async () => {
 
     try {
+
+      setLoadingUser(true);
 
       const data = await getMe();
 
@@ -61,6 +67,10 @@ export default function App() {
     } catch (err) {
 
       console.error("Failed to load user", err);
+
+    } finally {
+
+      setLoadingUser(false);
     }
   };
 
@@ -143,10 +153,16 @@ export default function App() {
     );
   }
 
+  if (loadingUser) {
+    return <p>Loading...</p>;
+  }
+
 
   // ======================
   // MAIN APP
   // ======================
+
+
   return (
 
     <div className="app-container">

@@ -2,48 +2,84 @@ from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 
 
-# USER MODEL
-# Represents a registered user in the system
-# Each user can create posts and comments
-
 class User(SQLModel, table=True):
 
-    """
-    Database model for users
-
-    Stores authentication and identification data
-    Passwords are stored as hashes for security
-    """
-    
     __tablename__ = "user"
 
-
+    # =========================
     # PRIMARY KEY
-    # Unique identifier for each user
-    id: Optional[int] = Field(default=None, primary_key=True)
+    # =========================
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True
+    )
 
+    # =========================
     # USERNAME
-    # Public identifier used for login and display
-    # Indexed for fast lookup during authentication
-    username: str = Field(index=True)
+    # =========================
+    username: str = Field(
+        index=True,
+        unique=True
+    )
 
+    # =========================
     # EMAIL
-    # User email address (also indexed for quick lookup)
-    email: str = Field(index=True)
+    # =========================
+    email: str = Field(
+        index=True,
+        unique=True
+    )
 
-    # PASSWORD HASH
-    # Secure hashed password
+    # =========================
+    # PASSWORD
+    # =========================
     password_hash: str
 
-    bio: Optional[str] = "Fullstack developer 🚀"
+    # =========================
+    # PROFILE
+    # =========================
+    bio: Optional[str] = Field(
+        default="Fullstack developer 🚀"
+    )
 
-    posts: List["Post"] = Relationship(back_populates="author")
+    # =========================
+    # RELATIONSHIPS
+    # =========================
 
-    likes: list["Like"] = Relationship(back_populates="user")
-    
-    comments: list["Comment"] = Relationship(back_populates="user")
+    posts: List["Post"] = Relationship(
+        back_populates="author"
+    )
+
+    likes: List["Like"] = Relationship(
+        back_populates="user"
+    )
+
+    comments: List["Comment"] = Relationship(
+        back_populates="user"
+    )
+
+    # =========================
+    # FOLLOW SYSTEM
+    # =========================
+
+    # usuarios que YO sigo
+    following: List["Follow"] = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "[Follow.follower_id]",
+            "cascade": "all, delete-orphan"
+        }
+    )
+
+    # usuarios que ME siguen
+    followers: List["Follow"] = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "[Follow.following_id]",
+            "cascade": "all, delete-orphan"
+        }
+    )
 
 
-from app.models.like import Like
 from app.models.post import Post
+from app.models.like import Like
 from app.models.comment import Comment
+from app.models.follow import Follow
