@@ -421,3 +421,45 @@ html, body {
   opacity: 0.9;
   transform: scale(1.05);
 }
+
+
+
+.follow-btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 2px solid #9ca3af;
+  background: white;
+  color: #111827;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* 👀 HOVER FOLLOW (MUY NOTABLE) */
+.follow-btn:hover {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+  transform: scale(1.05);
+}
+
+/* ✔ FOLLOWING (VERDE CLARO) */
+.follow-btn.following {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+/* 🔥 HOVER UNFOLLOW (ROJO CLARO) */
+.follow-btn.following:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* ⛔ LOADING */
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

@@ -41,8 +41,12 @@ export default function FollowButton({ userId }) {
   };
 
   return (
-    <button onClick={handleFollow}>
-      {loading ? "Loading..." : isFollowing ? "Unfollow" : "Follow"}
+    <button
+      onClick={handleFollow}
+      className={`follow-btn ${isFollowing ? "following" : ""}`}
+      disabled={loading}
+    >
+      {loading ? "..." : isFollowing ? "Following" : "Follow"}
     </button>
   );
 }

@@ -54,12 +54,19 @@ def create_post(
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
+    
+    print("POST CREATE DATA:", post_create.dict())
+    print("IMAGE URL RECEIVED:", post_create.image_url)
+
 
     new_post = Post(
         title=post_create.title,
         content=post_create.content,
+        image_url=post_create.image_url,
         author_id=current_user.id
     )
+
+    print("IMAGE URL:", new_post.image_url)
 
     session.add(new_post)
     session.commit()
@@ -69,6 +76,7 @@ def create_post(
         id=new_post.id,
         title=new_post.title,
         content=new_post.content,
+        image_url=new_post.image_url,
         author_id=new_post.author_id,
         author_username=current_user.username,
         likes_count=0,
@@ -98,6 +106,7 @@ def read_posts(session: SessionDep):
                 id=post.id,
                 title=post.title,
                 content=post.content,
+                image_url=post.image_url,
                 author_id=post.author_id,
                 author_username=user.username,
 
@@ -136,6 +145,7 @@ def read_post(post_id: int, session: SessionDep):
         id=post.id,
         title=post.title,
         content=post.content,
+        image_url=post.image_url,
         author_id=post.author_id,
         author_username=user.username,
         likes_count=len(post.likes),
@@ -175,6 +185,7 @@ def update_post(
         id=post.id,
         title=post.title,
         content=post.content,
+        image_url=post.image_url,
         author_id=post.author_id,
         author_username=post.author.username,
         likes_count=len(post.likes),

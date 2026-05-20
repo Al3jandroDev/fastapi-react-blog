@@ -16,6 +16,10 @@ export default function Posts({
   // ✅ DEBUG
   console.log("LOGGED USER ID:", user?.id);
   console.log("POSTS:", posts);
+  console.log("POST IMAGE URL:", posts[0]?.image_url);
+  console.log("TODOS LOS POSTS:", posts);
+  console.log("POST RAW:", posts[0]);
+  console.log("IMAGE TYPE:", typeof posts[0]?.image_url);
 
 
   const navigate = useNavigate();
@@ -210,6 +214,20 @@ export default function Posts({
               <>
                 <h3>{post.title}</h3>
 
+                {post.image_url && (
+                  <img
+                    src={post.image_url}
+                    alt="post"
+                    style={{
+                      width: "100%",
+                      maxHeight: "400px",
+                      borderRadius: "10px",
+                      marginTop: "10px",
+                      objectFit: "cover"
+                    }}
+                  />
+                )}
+
                 <p>{post.content}</p>
 
 
@@ -246,8 +264,8 @@ export default function Posts({
 
                   <button
                     className={`like-btn ${post.liked_by_me
-                        ? "liked"
-                        : ""
+                      ? "liked"
+                      : ""
                       }`}
                     onClick={() =>
                       handleLike(post)

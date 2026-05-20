@@ -15,6 +15,7 @@ from sqlmodel import SQLModel
 class PostCreate(SQLModel):
     title: str
     content: str
+    image_url: str | None = None
 
     @field_validator("title", "content")
     @classmethod
@@ -30,6 +31,7 @@ class PostRead(SQLModel):
     id: int
     title: str
     content: str
+    image_url: str | None = None
     author_id: int
     author_username: str
     likes_count: int = 0

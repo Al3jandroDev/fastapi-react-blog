@@ -16,7 +16,7 @@ export async function getPosts() {
 /**
  * Create post
  */
-export async function createPost(title, content) {
+export async function createPost({ title, content, image_url = null }) {
   const token = localStorage.getItem("token");
 
   const res = await fetch(`${API_URL}/posts/`, {
@@ -25,7 +25,7 @@ export async function createPost(title, content) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ title, content }),
+    body: JSON.stringify({ title, content, image_url }),
   });
 
   if (!res.ok) {

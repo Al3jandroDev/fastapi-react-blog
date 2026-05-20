@@ -64,6 +64,8 @@ class Post(SQLModel, table=True):
         }
     )
 
+    image_url: Optional[str] = Field(default=None)
+
 
 
 

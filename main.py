@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from app.db.database import create_db_and_tables
 
 # Routers (modular API structure)
-from app.routes import posts, comments, auth, likes, users, follow
+from app.routes import posts, comments, auth, likes, users, follow, upload
 
 # Create FastAPI app instance
 app = FastAPI()
@@ -31,6 +31,7 @@ app.include_router(auth.router)
 app.include_router(likes.router)
 app.include_router(users.router)
 app.include_router(follow.router)
+app.include_router(upload.router)
 
 
 # ROOT ENDPOINT
