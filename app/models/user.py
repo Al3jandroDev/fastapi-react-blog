@@ -1,5 +1,6 @@
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
+from datetime import datetime
 
 
 class User(SQLModel, table=True):
@@ -77,6 +78,10 @@ class User(SQLModel, table=True):
             "cascade": "all, delete-orphan"
         }
     )
+
+    avatar_url: str = Field(default="/uploads/default-avatar.jpg")
+    banner_url: str = Field(default="/uploads/default-banner.jpg")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 from app.models.post import Post

@@ -214,10 +214,11 @@ export default function Posts({
               <>
                 <h3>{post.title}</h3>
 
-                {post.image_url && (
+                {post.image_url ? (
                   <img
                     src={post.image_url}
                     alt="post"
+                    loading="lazy"
                     style={{
                       width: "100%",
                       maxHeight: "400px",
@@ -226,6 +227,23 @@ export default function Posts({
                       objectFit: "cover"
                     }}
                   />
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      background: "#e5e7eb",
+                      borderRadius: "10px",
+                      marginTop: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b7280",
+                      fontSize: "14px"
+                    }}
+                  >
+                    Sin imagen
+                  </div>
                 )}
 
                 <p>{post.content}</p>
