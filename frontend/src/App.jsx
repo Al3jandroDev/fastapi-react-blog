@@ -29,6 +29,7 @@ export default function App() {
 
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
+  const [dark, setDark] = useState(false);
 
 
 
@@ -48,6 +49,11 @@ export default function App() {
     }
 
   }, [token]);
+
+  // DARK MODE
+  useEffect(() => {
+    document.body.classList.toggle("dark", dark);
+  }, [dark]);
 
 
   // ======================
@@ -170,20 +176,15 @@ export default function App() {
       {/* NAVBAR */}
       <nav className="navbar">
 
-        <h2
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        >
+        <h2 onClick={() => navigate("/")}>
           FastAPI Social
         </h2>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-          }}
-        >
+        <div className="nav-right">
+
+          <button onClick={() => setDark(!dark)}>
+            🌙
+          </button>
 
           <button
             className="nav-user-btn"

@@ -37,146 +37,151 @@ export default function Profile() {
   if (loading) return <p>Loading profile...</p>;
   if (!profile) return <p>Profile not found</p>;
 
- return (
-  <div className="profile-container">
+  return (
+    <div className="profile-container">
 
-    <button
-      className="back-btn"
-      onClick={() => navigate("/")}
-    >
-      ← Back to feed
-    </button>
-
-    {/* BANNER */}
-    <div style={{ position: "relative" }}>
-
-      {profile.banner_url ? (
-        <img
-          src={`${IMAGE_BASE}${profile.banner_url}`}
-          alt="banner"
-          style={{
-            width: "100%",
-            height: "200px",
-            objectFit: "cover",
-            borderRadius: "12px"
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            height: "200px",
-            background: "#e5e7eb",
-            borderRadius: "12px"
-          }}
-        />
-      )}
-
-      {/* AVATAR FLOTTANTE */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-40px",
-          left: "20px"
-        }}
+      <button
+        className="back-btn"
+        onClick={() => navigate("/")}
       >
-        {profile.avatar_url ? (
+        ← Back to feed
+      </button>
+
+      {/* BANNER */}
+      <div style={{ position: "relative" }}>
+
+        {profile.banner_url ? (
           <img
-            src={`${IMAGE_BASE}${profile.avatar_url}`}
-            alt="avatar"
+            src={`${IMAGE_BASE}${profile.banner_url}`}
+            alt="banner"
             style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
+              width: "100%",
+              height: "200px",
               objectFit: "cover",
-              border: "4px solid white",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+              borderRadius: "12px"
             }}
           />
         ) : (
           <div
             style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              background: "#ddd",
-              border: "4px solid white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "24px",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+              width: "100%",
+              height: "200px",
+              background: "#e5e7eb",
+              borderRadius: "12px"
             }}
-          >
-            👤
-          </div>
+          />
         )}
-      </div>
 
-    </div>
-
-    {/* INFO */}
-    <div style={{ marginTop: "60px" }}>
-
-      <h2 style={{ marginBottom: "4px" }}>
-        @{profile.username}
-      </h2>
-
-      <p style={{ color: "#666" }}>
-        {profile.bio}
-      </p>
-
-      {/* STATS */}
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginTop: "10px"
-        }}
-      >
-        <div>
-          <strong>{profile.followers_count ?? 0}</strong> Followers
+        {/* AVATAR FLOTTANTE */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-40px",
+            left: "20px"
+          }}
+        >
+          {profile.avatar_url ? (
+            <img
+              src={`${IMAGE_BASE}${profile.avatar_url}`}
+              alt="avatar"
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "4px solid white",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "#ddd",
+                border: "4px solid white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "24px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+              }}
+            >
+              👤
+            </div>
+          )}
         </div>
 
-        <div>
-          <strong>{profile.following_count ?? 0}</strong> Following
-        </div>
       </div>
 
-      <small style={{ color: "#888", display: "block", marginTop: "6px" }}>
-        Joined {profile.created_at}
-      </small>
+      {/* INFO */}
+      <div style={{ marginTop: "60px" }}>
 
-    </div>
+        <h2 style={{ marginBottom: "4px" }}>
+          @{profile.username}
+        </h2>
 
-    {/* POSTS */}
-    <div className="profile-posts">
+        <p style={{ color: "#666" }}>
+          {profile.bio}
+        </p>
 
-      <h3>Posts</h3>
-
-      {profile.posts.length === 0 ? (
-        <p>No posts yet</p>
-      ) : (
-        profile.posts.map((post) => (
-          <div
-            key={post.id}
-            className="profile-post"
-            style={{
-              marginTop: "15px",
-              padding: "10px",
-              border: "1px solid #eee",
-              borderRadius: "10px"
-            }}
-          >
-            <h4>{post.title}</h4>
-            <p>{post.content}</p>
-            <small>❤️ {post.likes_count ?? 0}</small>
+        {/* STATS */}
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            marginTop: "10px"
+          }}
+        >
+          <div>
+            <strong>{profile.followers_count ?? 0}</strong> Followers
           </div>
-        ))
-      )}
+
+          <div>
+            <strong>{profile.following_count ?? 0}</strong> Following
+          </div>
+        </div>
+
+        <small style={{ color: "#888", display: "block", marginTop: "6px" }}>
+          Joined{" "}
+          {new Date(profile.created_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </small>
+
+      </div>
+
+      {/* POSTS */}
+      <div className="profile-posts">
+
+        <h3>Posts</h3>
+
+        {profile.posts.length === 0 ? (
+          <p>No posts yet</p>
+        ) : (
+          profile.posts.map((post) => (
+            <div
+              key={post.id}
+              className="profile-post"
+              style={{
+                marginTop: "15px",
+                padding: "10px",
+                border: "1px solid #eee",
+                borderRadius: "10px"
+              }}
+            >
+              <h4>{post.title}</h4>
+              <p>{post.content}</p>
+              <small>❤️ {post.likes_count ?? 0}</small>
+            </div>
+          ))
+        )}
+
+      </div>
 
     </div>
-
-  </div>
-);
+  );
 }
