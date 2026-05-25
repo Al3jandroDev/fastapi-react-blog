@@ -34,6 +34,13 @@ export default function App() {
 
 
 
+  const updatePost = (updatedPost) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === updatedPost.id ? updatedPost : p
+      )
+    );
+  };
 
   // ======================
   // LOAD DATA
@@ -183,7 +190,7 @@ export default function App() {
         <div className="nav-right">
 
           <button onClick={() => setDark(!dark)}>
-            🌙
+            {dark ? "☀️" : "🌙"}
           </button>
 
           <button
@@ -220,6 +227,7 @@ export default function App() {
                 posts={posts}
                 setPosts={setPosts}
                 user={user}
+                updatePost={updatePost}
               />
 
             </main>

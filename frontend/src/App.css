@@ -17,6 +17,42 @@ html, body {
   color: var(--text);
 }
 
+
+
+button {
+  font: inherit;
+}
+
+.nav-btn,
+.edit-btn,
+.delete-btn,
+.comment-btn,
+.like-btn,
+.theme-btn,
+.btn-primary,
+button {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.nav-btn:hover,
+.edit-btn:hover,
+.delete-btn:hover,
+.comment-btn:hover,
+.like-btn:hover,
+.theme-btn:hover,
+.btn-primary:hover,
+button:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* =========================
    GOOGLE LOGIN PAGE
 ========================= */
@@ -181,10 +217,12 @@ html, body {
   transition: 0.2s;
 }
 
+
 .create-post input:focus,
 .create-post textarea:focus {
-  background: white;
-  border-color: #3b82f6;
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
 }
 
@@ -192,7 +230,7 @@ html, body {
 .btn-primary {
   width: 100%;
   padding: 13px;
-  background: #1d9bf0;
+  background: var(--accent);
   color: white;
 
   border: none;
@@ -205,7 +243,7 @@ html, body {
 }
 
 .btn-primary:hover {
-  background: #1686d9;
+  opacity: 0.92;
   transform: translateY(-1px);
 }
 
@@ -248,7 +286,7 @@ html, body {
   top: 10%;
   height: 80%;
   width: 3px;
-  background: #1d9bf0;
+  background: var(--accent);
   border-radius: 10px;
   opacity: 0;
   transition: 0.2s;
@@ -271,9 +309,7 @@ html, body {
   color: var(--muted);
 }
 
-.post:last-child {
-  border-bottom: none;
-}
+
 
 
 
@@ -295,19 +331,6 @@ body.dark .navbar {
   border-bottom: 1px solid #5d6674;
 }
 
-body.dark .create-post,
-body.dark .post {
-  background: #111827;
-  border-color: #1f2937;
-}
-
-body.dark .post p {
-  color: #cbd5e1;
-}
-
-body.dark .post small {
-  color: #94a3b8;
-}
 
 
 /* =========================
@@ -329,3 +352,84 @@ body.dark .post small {
 .like-btn.liked {
   animation: pop 0.25s ease;
 }
+
+
+/* inputs normales */
+textarea,
+input[type="text"] {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* input file */
+input[type="file"]::file-selector-button {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--accent);
+  color: white;
+}
+.comment-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.comment-box textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  resize: none;
+}
+
+.comment-box textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.post-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  align-items: center;
+}
+
+.theme-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+
+body,
+.navbar,
+.post,
+.create-post,
+.google-card,
+button,
+input,
+textarea {
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
