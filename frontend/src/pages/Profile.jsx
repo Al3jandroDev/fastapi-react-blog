@@ -1,56 +1,34 @@
-import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import API_URL from "../api/client";
+import { usePostStore } from "../store/usePostStore";
 
 export default function Profile() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const posts = usePostStore((s) => s.posts);
 
   const IMAGE_BASE = "http://127.0.0.1:8000";
 
-  const navigate = useNavigate();
+  const userPosts = posts.filter(
+    (p) => String(p.author_id) === String(id)
+  );
 
-  useEffect(() => {
-    fetchProfile();
-  }, [id]);
+  const profile = userPosts[0]?.user;
 
-  const fetchProfile = async () => {
-    try {
-      const res = await fetch(`${API_URL}/users/${id}`);
-
-      if (!res.ok) {
-        throw new Error("Failed to load profile");
-      }
-
-      const data = await res.json();
-      setProfile(data);
-
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <p>Loading profile...</p>;
-  if (!profile) return <p>Profile not found</p>;
+  const username =
+    profile?.username || userPosts[0]?.author_username;
 
   return (
     <div className="profile-container">
 
-      <button
-        className="back-btn"
-        onClick={() => navigate("/")}
-      >
+      <button onClick={() => navigate("/")}>
         ← Back to feed
       </button>
 
-      {/* BANNER */}
+      {/* ================= BANNER ================= */}
       <div style={{ position: "relative" }}>
 
-        {profile.banner_url ? (
+        {profile?.banner_url ? (
           <img
             src={`${IMAGE_BASE}${profile.banner_url}`}
             alt="banner"
@@ -72,7 +50,7 @@ export default function Profile() {
           />
         )}
 
-        {/* AVATAR FLOTTANTE */}
+        {/* ================= AVATAR ================= */}
         <div
           style={{
             position: "absolute",
@@ -80,7 +58,7 @@ export default function Profile() {
             left: "20px"
           }}
         >
-          {profile.avatar_url ? (
+          {profile?.avatar_url ? (
             <img
               src={`${IMAGE_BASE}${profile.avatar_url}`}
               alt="avatar"
@@ -104,84 +82,29 @@ export default function Profile() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "24px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+                fontSize: "24px"
               }}
             >
               👤
             </div>
           )}
         </div>
-
       </div>
 
-      {/* INFO */}
+      {/* ================= INFO ================= */}
       <div style={{ marginTop: "60px" }}>
+        <h2>@{username || "User"}</h2>
+        <p>{userPosts.length} posts</p>
+      </div>
 
-        <h2 style={{ marginBottom: "4px" }}>
-          @{profile.username}
-        </h2>
-
-        <p style={{ color: "#666" }}>
-          {profile.bio}
-        </p>
-
-        {/* STATS */}
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            marginTop: "10px"
-          }}
-        >
-          <div>
-            <strong>{profile.followers_count ?? 0}</strong> Followers
-          </div>
-
-          <div>
-            <strong>{profile.following_count ?? 0}</strong> Following
-          </div>
+      {/* ================= POSTS ================= */}
+      {userPosts.map((post) => (
+        <div key={post.id}>
+          <h4>{post.title}</h4>
+          <p>{post.content}</p>
+          <small>❤️ {post.likes_count}</small>
         </div>
-
-        <small style={{ color: "#888", display: "block", marginTop: "6px" }}>
-          Joined{" "}
-          {new Date(profile.created_at).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-        </small>
-
-      </div>
-
-      {/* POSTS */}
-      <div className="profile-posts">
-
-        <h3>Posts</h3>
-
-        {profile.posts.length === 0 ? (
-          <p>No posts yet</p>
-        ) : (
-          profile.posts.map((post) => (
-            <div
-              key={post.id}
-              className="profile-post"
-              style={{
-                marginTop: "15px",
-                padding: "10px",
-                border: "1px solid #eee",
-                borderRadius: "10px"
-              }}
-            >
-              <h4>{post.title}</h4>
-              <p>{post.content}</p>
-              <small>❤️ {post.likes_count ?? 0}</small>
-            </div>
-          ))
-        )}
-
-      </div>
-
+      ))}
     </div>
   );
 }

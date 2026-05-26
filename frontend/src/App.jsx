@@ -15,6 +15,8 @@ import { getPosts } from "./api/posts";
 import { getMe } from "./api/auth";
 import { useNavigate } from "react-router-dom";
 
+import { usePostStore } from "./store/usePostStore";
+
 
 export default function App() {
 
@@ -25,22 +27,21 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(false);
 
-  const [posts, setPosts] = useState([]);
 
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
   const [dark, setDark] = useState(false);
 
+  const posts = usePostStore((s) => s.posts);
+  const setPosts = usePostStore((s) => s.setPosts);
+  const toggleLike = usePostStore((s) => s.toggleLike);
 
-
-
-  const updatePost = (updatedPost) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === updatedPost.id ? updatedPost : p
-      )
-    );
+  const handleLike = (postId) => {
+    toggleLike(postId);
   };
+
+
+
 
   // ======================
   // LOAD DATA
@@ -225,9 +226,8 @@ export default function App() {
 
               <Posts
                 posts={posts}
-                setPosts={setPosts}
                 user={user}
-                updatePost={updatePost}
+                onLike={handleLike}
               />
 
             </main>
