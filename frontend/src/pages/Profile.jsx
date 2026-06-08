@@ -1,22 +1,31 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { usePostStore } from "../store/usePostStore";
+import { getUser } from "../api/users";
+
+const IMAGE_BASE = "http://127.0.0.1:8000";
 
 export default function Profile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const posts = usePostStore((s) => s.posts);
+  const [profile, setProfile] = useState(null);
 
-  const IMAGE_BASE = "http://127.0.0.1:8000";
+  useEffect(() => {
+    loadProfile();
+  }, [id]);
 
-  const userPosts = posts.filter(
-    (p) => String(p.author_id) === String(id)
-  );
+  const loadProfile = async () => {
+    try {
+      const data = await getUser(id);
+      setProfile(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  const profile = userPosts[0]?.user;
-
-  const username =
-    profile?.username || userPosts[0]?.author_username;
+  if (!profile) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="profile-container">
@@ -28,7 +37,7 @@ export default function Profile() {
       {/* ================= BANNER ================= */}
       <div style={{ position: "relative" }}>
 
-        {profile?.banner_url ? (
+        {profile.banner_url ? (
           <img
             src={`${IMAGE_BASE}${profile.banner_url}`}
             alt="banner"
@@ -58,7 +67,7 @@ export default function Profile() {
             left: "20px"
           }}
         >
-          {profile?.avatar_url ? (
+          {profile.avatar_url ? (
             <img
               src={`${IMAGE_BASE}${profile.avatar_url}`}
               alt="avatar"
@@ -67,8 +76,7 @@ export default function Profile() {
                 height: "80px",
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: "4px solid white",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+                border: "4px solid white"
               }}
             />
           ) : (
@@ -81,8 +89,7 @@ export default function Profile() {
                 border: "4px solid white",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "24px"
+                justifyContent: "center"
               }}
             >
               👤
@@ -93,16 +100,23 @@ export default function Profile() {
 
       {/* ================= INFO ================= */}
       <div style={{ marginTop: "60px" }}>
-        <h2>@{username || "User"}</h2>
-        <p>{userPosts.length} posts</p>
+        <h2>@{profile.username}</h2>
+
+        <p>{profile.bio}</p>
+
+        <p>
+          {profile.followers_count} followers ·{" "}
+          {profile.following_count} following
+        </p>
+
+        <p>{profile.posts.length} posts</p>
       </div>
 
       {/* ================= POSTS ================= */}
-      {userPosts.map((post) => (
+      {profile.posts.map((post) => (
         <div key={post.id}>
           <h4>{post.title}</h4>
           <p>{post.content}</p>
-          <small>❤️ {post.likes_count}</small>
         </div>
       ))}
     </div>
