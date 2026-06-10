@@ -39,23 +39,24 @@ export default function Posts({ posts, user }) {
     setEditingId(null);
   };
 
-  // LIKE
-  const handleLike = async (post) => {
-    const wasLiked = post.liked_by_me;
+const handleLike = async (post) => {
+  const wasLiked = post.liked_by_me;
 
-    toggleLike(post.id);
+  toggleLike(post.id);
 
-    try {
-      if (wasLiked) {
-        await unlikePost(post.id);
-      } else {
-        await likePost(post.id);
-      }
-    } catch (err) {
-      console.error(err);
-      toggleLike(post.id);
+  try {
+    if (wasLiked) {
+      await unlikePost(post.id);
+    } else {
+      await likePost(post.id);
     }
-  };
+  } catch (err) {
+    console.error(err);
+
+    // rollback seguro
+    toggleLike(post.id);
+  }
+};
 
   if (!user) return <p>Loading user...</p>;
   if (!posts.length) return <p>No posts yet</p>;

@@ -4,7 +4,13 @@ import API_URL from "./client";
  * Fetch all posts
  */
 export async function getPosts() {
-  const res = await fetch(`${API_URL}/posts/`);
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_URL}/posts/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
     throw new Error("Error fetching posts");

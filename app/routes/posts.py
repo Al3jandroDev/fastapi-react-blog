@@ -1,26 +1,13 @@
-# FastAPI imports
 from fastapi import APIRouter, Depends, HTTPException
-
-# SQLModel
 from sqlmodel import Session, select
-
-# Typing
 from typing import Annotated, List
 
-# Models
 from app.models.post import Post
 from app.models.user import User
 from app.models.like import Like
-
-# Schemas
 from app.schemas.post import PostCreate, PostRead, PostUpdate
-
-# DB
 from app.db.database import get_session
-
-# Auth
 from app.services.auth import get_current_user
-
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -46,7 +33,7 @@ def get_post_or_404(session: Session, post_id: int) -> Post:
 
 
 # =========================
-# CREATE POST (PROTEGIDO)
+# CREATE POST
 # =========================
 @router.post("/", response_model=PostRead, status_code=201)
 def create_post(
@@ -54,10 +41,6 @@ def create_post(
     session: SessionDep,
     current_user: User = Depends(get_current_user)
 ):
-    
-    print("POST CREATE DATA:", post_create.dict())
-    print("IMAGE URL RECEIVED:", post_create.image_url)
-
 
     new_post = Post(
         title=post_create.title,
@@ -65,8 +48,6 @@ def create_post(
         image_url=post_create.image_url,
         author_id=current_user.id
     )
-
-    print("IMAGE URL:", new_post.image_url)
 
     session.add(new_post)
     session.commit()
@@ -85,10 +66,14 @@ def create_post(
 
 
 # =========================
-# GET ALL POSTS (🔥 PÚBLICO)
+# GET ALL POSTS (🔥 FIX PRINCIPAL)
 # =========================
 @router.get("/", response_model=List[PostRead])
-def read_posts(session: SessionDep):
+def read_posts(
+    session: SessionDep,
+    current_user: User = Depends(get_current_user)   # 🔥 IMPORTANTE
+):
+
     statement = (
         select(Post, User)
         .join(User, Post.author_id == User.id)
@@ -101,6 +86,13 @@ def read_posts(session: SessionDep):
 
     for post, user in results:
 
+        liked = session.exec(
+            select(Like).where(
+                Like.post_id == post.id,
+                Like.user_id == current_user.id
+            )
+        ).first() is not None
+
         posts.append(
             PostRead(
                 id=post.id,
@@ -110,9 +102,8 @@ def read_posts(session: SessionDep):
                 author_id=post.author_id,
                 author_username=user.username,
 
-                # 👇 feed público
                 likes_count=len(post.likes),
-                liked_by_me=False
+                liked_by_me=liked
             )
         )
 
@@ -120,7 +111,7 @@ def read_posts(session: SessionDep):
 
 
 # =========================
-# GET SINGLE POST (PÚBLICO)
+# GET SINGLE POST
 # =========================
 @router.get("/{post_id}", response_model=PostRead)
 def read_post(post_id: int, session: SessionDep):
@@ -134,10 +125,7 @@ def read_post(post_id: int, session: SessionDep):
     result = session.exec(statement).first()
 
     if not result:
-        raise HTTPException(
-            status_code=404,
-            detail="Post not found"
-        )
+        raise HTTPException(status_code=404, detail="Post not found")
 
     post, user = result
 
@@ -154,7 +142,7 @@ def read_post(post_id: int, session: SessionDep):
 
 
 # =========================
-# UPDATE POST (PROTEGIDO)
+# UPDATE POST
 # =========================
 @router.patch("/{post_id}", response_model=PostRead)
 def update_post(
@@ -167,14 +155,9 @@ def update_post(
     post = get_post_or_404(session, post_id)
 
     if post.author_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized")
 
-    update_data = post_update.model_dump(exclude_unset=True)
-
-    for key, value in update_data.items():
+    for key, value in post_update.model_dump(exclude_unset=True).items():
         setattr(post, key, value)
 
     session.add(post)
@@ -197,7 +180,7 @@ def update_post(
 
 
 # =========================
-# DELETE POST (PROTEGIDO)
+# DELETE POST
 # =========================
 @router.delete("/{post_id}", status_code=204)
 def delete_post(
@@ -209,10 +192,7 @@ def delete_post(
     post = get_post_or_404(session, post_id)
 
     if post.author_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     session.delete(post)
     session.commit()
