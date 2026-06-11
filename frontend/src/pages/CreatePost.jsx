@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { createPost } from "../api/posts";
+import { usePostStore } from "../store/usePostStore";
 
-export default function CreatePost({ onPostCreated }) {
+export default function CreatePost() {
+  const addPost = usePostStore((s) => s.addPost); // 🔥 STORE
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
@@ -19,7 +22,9 @@ export default function CreatePost({ onPostCreated }) {
     try {
       let image_url = null;
 
-      // 1. subir imagen SOLO si existe
+      // =========================
+      // 1. UPLOAD IMAGE
+      // =========================
       if (image) {
         setUploading(true);
 
@@ -39,15 +44,19 @@ export default function CreatePost({ onPostCreated }) {
         setUploading(false);
       }
 
-      // 2. crear post con o sin imagen
+      // =========================
+      // 2. CREATE POST
+      // =========================
       const newPost = await createPost({
         title,
         content,
-        image_url, // 👈 IMPORTANTE
+        image_url,
       });
 
-      onPostCreated?.(newPost);
+      // 🔥 FIX PRINCIPAL (ESTO TE FALTABA)
+      addPost(newPost);
 
+      // reset form
       setTitle("");
       setContent("");
       setImage(null);
@@ -89,12 +98,20 @@ export default function CreatePost({ onPostCreated }) {
         <img
           src={URL.createObjectURL(image)}
           alt="preview"
-          style={{ width: "100%", borderRadius: "10px", marginTop: "10px" }}
+          style={{
+            width: "100%",
+            borderRadius: "10px",
+            marginTop: "10px",
+          }}
         />
       )}
 
       <button disabled={loading || uploading}>
-        {uploading ? "Subiendo imagen..." : loading ? "Creando..." : "Crear"}
+        {uploading
+          ? "Subiendo imagen..."
+          : loading
+          ? "Creando..."
+          : "Crear"}
       </button>
     </form>
   );

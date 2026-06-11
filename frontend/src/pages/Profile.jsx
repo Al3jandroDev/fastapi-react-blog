@@ -23,9 +23,7 @@ export default function Profile() {
     }
   };
 
-  if (!profile) {
-    return <p>Loading...</p>;
-  }
+  if (!profile) return <p>Loading...</p>;
 
   return (
     <div className="profile-container">
@@ -113,12 +111,34 @@ export default function Profile() {
       </div>
 
       {/* ================= POSTS ================= */}
-      {profile.posts.map((post) => (
-        <div key={post.id}>
-          <h4>{post.title}</h4>
-          <p>{post.content}</p>
-        </div>
-      ))}
+      <div className="posts-grid">
+        {profile.posts.map((post) => (
+          <div key={post.id} className="post-card">
+
+            <h4>{post.title}</h4>
+
+            {post.image_url && (
+              <img
+                src={`${IMAGE_BASE}${post.image_url}`}
+                alt=""
+                style={{
+                  width: "100%",
+                  borderRadius: "10px",
+                  marginBottom: "8px"
+                }}
+              />
+            )}
+
+            <p>{post.content}</p>
+
+            <button>
+              ❤️ {post.likes_count || 0}
+            </button>
+
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }
